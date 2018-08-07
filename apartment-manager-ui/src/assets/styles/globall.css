@@ -1,0 +1,7 @@
+input, button, textarea {
+  outline: none;
+}
+
+span.link:hover {
+  cursor: pointer;
+}
