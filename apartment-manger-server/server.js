@@ -5,7 +5,7 @@ var cors = require('cors');
 var bodyParser = require('body-parser');
 var expressJwt = require('express-jwt');
 var config = require('config.json');
-var paths = ['/users/authenticate', '/users/register', '/hotels/authenticate' , '/hotels/register', '/resort/authenticate' , '/resort/register', '/guests/record', '/resort/username', '/users/username'];
+var paths = ['/users/authenticate', '/users/register'];
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -27,6 +27,8 @@ app.use(expressJwt({
 // routes
 app.use('/users', require('./controllers/users.controller'));
 app.use('/apartment', require('./controllers/apartment.controller'));
+app.use('/bills', require('./controllers/bills.controller'));
+app.use('/tenant', require('./controllers/tenant.controller'));
 
 // start server
 var port = process.env.NODE_ENV === 'production' ? 80 : 4000;

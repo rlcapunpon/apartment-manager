@@ -55,7 +55,7 @@ export default {
     },
     showAddModal () {
       this.deleting = false
-      // this.adding = true
+      this.adding = true
       // console.log('showAddModal called.')
     },
     closeAddModal () {

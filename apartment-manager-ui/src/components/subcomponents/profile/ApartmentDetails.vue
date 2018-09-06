@@ -1,46 +1,108 @@
 <template>
-  <div v-if="!deleted" class="apartment-unit" v-bind:class="{ forDelete: deleting }">
-    <div class="display-image">
-      <img v-bind:src="apartment.diplayPhotoLink" />
+  <div>
+    <div v-if="editing" class="edit-details-back"  v-on:click="closeDetails()">
+      <span id="close-edit">close</span>
     </div>
-    <div class="properties">
-      <table>
-      <tr>
-          <td colspan="2">
-            <p>{{apartment.name}}</p>
-          </td>
+    <div v-if="editing" class="apartment-details">
+      <div>
+        <table>
+          <tr>
+              <td colspan="2">
+                <p>{{apartment.name}}</p>
+              </td>
+          </tr>
+          <tr>
+            <td>
+              Status:
+            </td>
+            <td>
+              <div v-if="isOccupied()" class="red-colored-label">OCCUPIED</div>
+              <div v-else class="green-colored-label">VACANT</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Rate:
+            </td>
+            <td>
+              {{apartment.rate}}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              Details:
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <div class="details">{{apartment.details}}</div>
+            </td>
         </tr>
-        <tr>
-          <td>
-            Rate:
-          </td>
-          <td>
-            {{apartment.rate}}
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            Details:
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            <div class="details">{{apartment.details}}</div>
-          </td>
-        </tr>
-      </table>
-    </div> 
-    <div class="footer">
-      <div v-if="!isOccupied()">
-        <div class="status-label green-colored-label">VACANT</div>
-        <button v-on:click="markAsOccupied()">Mark as Occupied</button>
+        </table>
+        <div class="set-due-date" v-if="settingDueDate">
+          Due Date: <input type="date" v-model="apartment.duedate">
+          <button v-on:click="saveDueDate">Save</button>
+          <button v-on:click="closeSetDueDate">Cancel</button>
+        </div>
       </div>
-      <div v-if="isOccupied()">
-        <div class="status-label red-colored-label">OCCUPIED</div>
-        <button class="red-colored-button" v-on:click="markAsVacant()">Mark as Vacant</button>
+
+      <tenant-details :apartmentId="apartment._id" :occupied="apartment.occupied" v-on:hasTenant="occupy"></tenant-details>
+      <bills-table :apartmentId="apartment._id"></bills-table>
+      
+      <div class="action-buttons">
+        <button v-on:click="showAddBill()">Add Bill</button>
+        <button v-if="isOccupied()" v-on:click="removeTenant()">Remove Tenant</button>
+        <button v-else v-on:click="showAddTenant()">Add Tenant</button>
+        <button v-if="!settingDueDate" v-on:click="showSetDueDate">Set Due Date</button>
+        <button v-if="!isOccupied()" v-on:click="markAsOccupied()">Mark as Occupied</button>
+        <button v-if="isOccupied()" v-on:click="markAsVacant()">Mark as Vacant</button>
       </div>
-      <div v-if="deleting">
-        <button v-on:click="deleteUnit()" class="red-colored-button">DELETE</button>
+
+    </div>
+    <add-tenant class="add-tenant" :apartmentId="apartment._id" v-if="addingTenant" v-on:hasTenant="occupy" v-on:closeComponent="closeAddTenant"></add-tenant>
+    <add-bill class="add-bill" :apartmentId="apartment._id" v-if="addingBill" v-on:addSuccess="billed" v-on:closeComponent="closeAddBill"></add-bill>
+
+    <div v-if="!deleted" class="apartment-unit" v-bind:class="{ forDelete: deleting }">
+      <div class="display-image" v-on:click="openDetails()">
+        <img v-bind:src="apartment.diplayPhotoLink" />
+      </div>
+      <div class="properties" v-on:click="openDetails()">
+        <table>
+        <tr>
+            <td colspan="2">
+              <p>{{apartment.name}}</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Rate:
+            </td>
+            <td>
+              {{apartment.rate}}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              Details:
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <div class="details">{{apartment.details}}</div>
+            </td>
+          </tr>
+        </table>
+      </div> 
+      <div class="footer">
+        <div v-if="!isOccupied()">
+          <div class="status-label green-colored-label">VACANT</div>
+        </div>
+        <div v-if="isOccupied()">
+          <div class="status-label red-colored-label">OCCUPIED</div>
+        </div>
+        <div v-if="deleting">
+          <button v-on:click="deleteUnit()" class="red-colored-button">DELETE</button>
+        </div>
       </div>
     </div>
   </div>
@@ -48,12 +110,22 @@
 
 <script>
 import { mapActions } from 'vuex'
+import TenantDetails from '../tenant/TenantDetails.vue'
+import AddTenant from '../tenant/AddTenant.vue'
+import BillsTable from '../bills/BillsTable.vue'
+import AddBill from '../bills/AddBill.vue'
 export default {
   name: 'ApartmentDetails',
   props: ['apartment', 'deleting'],
   data () {
     return {
-      deleted: false
+      deleted: false,
+      editing: false,
+      addingTenant: false,
+      addingBill: false,
+      settingDueDate: false,
+      hasTenant: false,
+      hasBill: false
     }
   },
   created () {
@@ -64,7 +136,7 @@ export default {
       deleteApartment: 'delete'
     }),
     markAsOccupied () {
-      console.log('will change occupation from: xx' + this.apartment.occupied + 'xx to true')
+      console.log('will change occupation from: ' + this.apartment.occupied + ' to true')
       this.apartment.occupied = true
       this.changeStatus(this.apartment._id)
     },
@@ -76,12 +148,56 @@ export default {
     isOccupied () {
       return this.apartment.occupied === true
     },
+    occupy () {
+      this.hasTenant = true
+      this.markAsOccupied()
+    },
+    billed () {
+      this.hasBill = true
+    },
     deleteUnit () {
       if (confirm('Are you sure you want to delete this item?')) {
         this.deleteApartment(this.apartment._id)
         this.deleted = true
       }
+    },
+    openDetails () {
+      this.editing = true
+      this.$emit('selected')
+    },
+    closeDetails () {
+      if (!this.addingTenant && !this.addingBill) {
+        this.editing = false
+        this.$emit('close')
+      }
+    },
+    showAddBill () {
+      this.addingBill = true
+    },
+    closeAddBill () {
+      this.addingBill = false
+    },
+    showAddTenant () {
+      this.addingTenant = true
+    },
+    closeAddTenant () {
+      this.addingTenant = false
+    },
+    showSetDueDate () {
+      this.settingDueDate = true
+    },
+    saveDueDate () {
+      this.settingDueDate = false
+    },
+    closeSetDueDate () {
+      this.settingDueDate = false
     }
+  },
+  components: {
+    'tenant-details': TenantDetails,
+    'bills-table': BillsTable,
+    'add-tenant': AddTenant,
+    'add-bill': AddBill
   }
 }
 </script>
@@ -101,13 +217,19 @@ export default {
   box-shadow: 1px 3px 16px grey;
   font-size: 14px;
   padding-bottom: 10px;
-  min-height: 430px;
-  max-height: 430px;
+  min-height: 383px;
+  max-height: 383px;
+  border: 2px solid white;
+}
+
+.apartment-unit:hover {
+  border: 2px solid #026900;
+  cursor: pointer;
 }
 
 .forDelete {
-  max-height: 490px;
-  min-height: 490px;
+  max-height: 430px;
+  min-height: 430px;
 }
 
 table {
@@ -150,7 +272,7 @@ button {
 
 button:hover {
   cursor: pointer;
-  background: green;
+  background: #026900;
 }
 
 .red-colored-button {
@@ -186,5 +308,62 @@ p {
 .properties {
   min-height: 206px;
   max-height: 206px;
+}
+
+.edit-details-back {
+  background: #026900;
+  z-index: 99;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  opacity: 0.96;
+}
+
+.apartment-details, .add-tenant, .add-bill {
+  position: fixed;
+  z-index: 99;
+  background: white;
+  width: 60%;
+  height: 80%;
+  margin-left: 20%;
+  border-radius: 10px;
+  border: 2px solid green
+}
+
+.apartment-details table {
+  width: 90%;
+  margin: 5%;
+}
+
+.action-buttons {
+  float: right;
+  margin-right: 5%;
+}
+
+#close-edit {
+  float: right;
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
+#close-edit:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.set-due-date {
+  padding: 10px;
+  border: 1px dotted gray;
+  margin-bottom: 20px;
+}
+
+.set-due-date input {
+  padding: 2px;
+  border-radius: 5px;
+  margin-right: 11px;
+  border: 1px solid gray;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 </style>
