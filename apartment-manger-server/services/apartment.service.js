@@ -7,6 +7,8 @@ var mongodb = require('mongodb');
 var mongo = require('mongoskin');
 var db = mongo.db(config.connectionString, { native_parser: true });
 db.bind('apartment');
+db.bind('bills')
+db.bind('tenant')
 
 var service = {};
 
@@ -74,6 +76,19 @@ function changeStatus(_id) {
         unitResolution = unit;
         unitResolution.occupied = newStatus;
         updateUnit();
+    });
+
+    db.bills.remove(
+        { apartmentId: _id },
+        function (err) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            deferred.resolve();
+    });
+    db.tenant.remove(
+        { apartmentId: _id },
+        function (err) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            deferred.resolve();
     });
   
     function updateUnit() {

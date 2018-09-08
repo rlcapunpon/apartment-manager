@@ -136,6 +136,9 @@ export default {
       deleteApartment: 'delete',
       update: 'update'
     }),
+    ...mapActions('tenants', {
+      deleteTenant: 'delete'
+    }),
     markAsOccupied () {
       console.log('will change occupation from: ' + this.apartment.occupied + ' to true')
       this.apartment.occupied = true
@@ -174,6 +177,10 @@ export default {
         this.$emit('close')
       }
     },
+    removeTenant () {
+      this.markAsVacant()
+      // this.deleteTenant()
+    },
     showAddBill () {
       this.addingBill = true
     },
@@ -197,9 +204,8 @@ export default {
     },
     update () {
       console.log('received an update')
-      this.closeDetails()
-      this.openDetails()
       this.$router.go()
+      this.openDetails()
     }
   },
   components: {
