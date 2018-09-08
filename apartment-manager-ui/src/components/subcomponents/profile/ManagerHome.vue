@@ -23,7 +23,7 @@
           <th>Due Date</th>
           <th>Status</th>
         </tr>
-        <tr v-for="bill in bills.items" :key="bill._id" class="center">
+        <tr v-for="bill in bills.items" v-if="isNearDueDate(bill.duedate)" :key="bill._id" class="center">
           <td>
             {{bill.apartmentName}}
           </td>
@@ -99,6 +99,17 @@ export default {
       console.log(id)
       this.$router.go()
       this.changeStatus(id)
+    },
+    isNearDueDate (date) {
+      // Uncomment code below to implement 2 days before due date notification
+      // var dueDate = new Date(date)
+      // var today = new Date()
+      // var timeDiff = Math.abs(dueDate.getTime() - today.getTime())
+      // var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24))
+      // return (today.getTime() - dueDate.getTime() > 0) || diffDays < 2
+
+      // Always returns true to show all bills for demo purposes, comment to use 2 days before due notification
+      return true
     }
   },
   components: {
