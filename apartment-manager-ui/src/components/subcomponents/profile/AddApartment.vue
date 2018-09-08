@@ -4,8 +4,6 @@
         <form class="form" @submit.prevent="handleSubmit">
           <div class="form-group">
             <br/><label for="name">Display Photo</label><br/>
-            <input type="file" name="photo" @change="processFile($event)" accept="image/x-png,image/gif,image/jpeg" placeholder="Choose File" />
-            <br/>or<br/>
             <input type="text" name="link" v-model="input.diplayPhotoLink" placeholder="Link to photo" />
           </div>
           <div class="form-group">
