@@ -13,8 +13,10 @@
     </div>
     <div class="notifications" v-if="!isSelecting && !adding">
       <h3>Upcoming Due Dates:</h3>
+      <div class="due-date-container">
         <table>
         <tr>
+          <th>Apartment</th>
           <th>Type</th>
           <th>Amount</th>
           <th>Remarks</th>
@@ -23,19 +25,24 @@
         </tr>
         <tr v-for="bill in bills.items" :key="bill._id" class="center">
           <td>
-            <span v-if="bill.type === 0">Water</span>
-            <span v-if="bill.type === 1">Electricity</span>
-            <span v-if="bill.type === 2">Miscellaneous</span>
+            {{bill.apartmentName}}
+          </td>
+          <td>
+            <span v-if="parseInt(bill.type) === 0">Rent</span>
+            <span v-if="parseInt(bill.type) === 1">Water</span>
+            <span v-if="parseInt(bill.type) === 2">Electricity</span>
+            <span v-if="parseInt(bill.type) === 3">Misc</span>
           </td>
           <td>{{bill.amount}}</td>
           <td>{{bill.remarks}}</td>
           <td>{{bill.duedate}}</td>
           <td>
-            <span v-if="bill.paid === false"><button class="mark-as-paid" >Mark as Paid</button></span>
+            <span v-if="bill.paid === false"><button class="mark-as-paid" v-on:click="markAsPaid(bill._id)">Mark as Paid</button></span>
             <span v-else>Paid</span>
           </td>
         </tr>
       </table>
+      </div>
     </div>
   </div>
 </template>
@@ -72,7 +79,8 @@ export default {
       deleteApartment: 'delete'
     }),
     ...mapActions('bills', {
-      getAllBills: 'getAll'
+      getAllBills: 'getAll',
+      changeStatus: 'changeStatus'
     }),
     initCreateNew () {
       this.adding = true
@@ -86,6 +94,11 @@ export default {
     },
     closed () {
       this.isSelecting = false
+    },
+    markAsPaid (id) {
+      console.log(id)
+      this.$router.go()
+      this.changeStatus(id)
     }
   },
   components: {
@@ -139,6 +152,13 @@ export default {
   margin-left: 20px;
   font-size: 15px;
   color: green;
+}
+
+.due-date-container {
+  background: white;
+  min-height: 81%;
+  margin-top: 42px;
+  border-top: 1px solid green;
 }
 
 .notifications table {

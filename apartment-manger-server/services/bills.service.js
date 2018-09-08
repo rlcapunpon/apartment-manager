@@ -11,6 +11,7 @@ db.bind('bills');
 var service = {};
 
 service.getAll = getAll;
+service.getAllUnpaid = getAllUnpaid;
 service.getById = getById;
 service.getByApartmentId = getByApartmentId;
 service.create = create;
@@ -34,7 +35,7 @@ function getAll() {
 function getAllUnpaid() {
     var deferred = Q.defer();
   
-    db.bills.find({ "paid": false }).toArray(function (err, bills) {
+    db.bills.find({ "paid": false }).sort( { duedate: 1 } ).toArray(function (err, bills) {
         if (err) deferred.reject(err.name + ': ' + err.message);
         deferred.resolve(bills);
     });
@@ -69,21 +70,7 @@ function getById(_id) {
 
 function create(unitParam) {
   var deferred = Q.defer();
-
-  // validation
-  db.bills.findOne(
-      { name: unitParam.name },
-      function (err, unit) {
-          if (err) deferred.reject(err.name + ': ' + err.message);
-
-          if (unit) {
-              // username already exists
-              deferred.reject('Unit "' + unitParam.name + '" already exists');
-          } else {
-              createUnit();
-          }
-      });
-
+    createUnit();
   function createUnit() {
       db.bills.insert(
         unitParam,

@@ -13,6 +13,7 @@ const actions = {
         bill => {
           commit('addSuccess', bill)
           router.push('/')
+          console.log('trying to push to /')
           setTimeout(() => {
             // display success message after route change completes
             dispatch('alert/success', 'Bill Addition successful', { root: true })
@@ -27,7 +28,6 @@ const actions = {
   },
   getAll ({ commit }) {
     commit('getAllRequest')
-
     billService.getAll()
       .then(
         bills => commit('getAllSuccess', bills),
@@ -36,7 +36,6 @@ const actions = {
   },
   getByApartmentId ({ commit }, apartmentId) {
     commit('getByApartmentRequest')
-
     billService.getByApartment(apartmentId)
       .then(
         tenants => commit('getByApartmentSuccess', tenants),
@@ -45,6 +44,7 @@ const actions = {
   },
   changeStatus ({ commit }, id) {
     commit('changeStatusRequest')
+    router.push('/')
     billService.changeStatus(id)
       .then(
         bill => commit('changeStatusSuccess', { id, bill }),

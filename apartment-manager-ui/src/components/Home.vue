@@ -3,7 +3,7 @@
   <header>
     <img src="../assets/rsa-clear-icon.png" id="logo-top" alt="My Apartment Logo">
 
-    <div id="new" v-if="deleting" class="left" v-on:click="showAddModal">+</div>
+    <div id="new" v-if="deleting" class="left" v-on:click="hideDeleteOptions">+</div>
     <div id="delete" v-if="!deleting" class="left" v-on:click="showDeleteOptions">-</div>
     <span id="logout" class="link" v-on:click="logout">Logout</span>
     <span id="separator">|</span>
@@ -63,6 +63,9 @@ export default {
     },
     showDeleteOptions () {
       this.deleting = true
+    },
+    hideDeleteOptions () {
+      this.deleting = false
     }
   },
   components: {

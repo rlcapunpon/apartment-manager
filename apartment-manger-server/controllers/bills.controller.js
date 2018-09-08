@@ -27,7 +27,7 @@ function add(req, res) {
 }
 
 function getAll(req, res) {
-  billsService.getAll()
+  billsService.getAllUnpaid()
       .then(function (bills) {
           res.send(bills);
       })

@@ -35,7 +35,7 @@
           </tr>
           <tr>
             <td colspan="2">
-              <div class="details">{{apartment.details}}</div>
+              <div class="details"><pre>{{apartment.details}}</pre></div>
             </td>
         </tr>
         </table>
@@ -47,7 +47,7 @@
       </div>
 
       <tenant-details :apartmentId="apartment._id" :occupied="apartment.occupied" v-on:hasTenant="occupy"></tenant-details>
-      <bills-table :apartmentId="apartment._id"></bills-table>
+      <bills-table :apartmentId="apartment._id"  v-on:updated="update"></bills-table>
       
       <div class="action-buttons">
         <button v-on:click="showAddBill()">Add Bill</button>
@@ -60,7 +60,7 @@
 
     </div>
     <add-tenant class="add-tenant" :apartmentId="apartment._id" v-if="addingTenant" v-on:hasTenant="occupy" v-on:closeComponent="closeAddTenant"></add-tenant>
-    <add-bill class="add-bill" :apartmentId="apartment._id" v-if="addingBill" v-on:addSuccess="billed" v-on:closeComponent="closeAddBill"></add-bill>
+    <add-bill class="add-bill" :apartmentId="apartment._id" :apartmentName="apartment.name" v-if="addingBill" v-on:updated="update" v-on:addSuccess="billed" v-on:closeComponent="closeAddBill"></add-bill>
 
     <div v-if="!deleted" class="apartment-unit" v-bind:class="{ forDelete: deleting }">
       <div class="display-image" v-on:click="openDetails()">
@@ -133,17 +133,20 @@ export default {
   methods: {
     ...mapActions('apartments', {
       changeStatus: 'changeStatus',
-      deleteApartment: 'delete'
+      deleteApartment: 'delete',
+      update: 'update'
     }),
     markAsOccupied () {
       console.log('will change occupation from: ' + this.apartment.occupied + ' to true')
       this.apartment.occupied = true
       this.changeStatus(this.apartment._id)
+      this.update()
     },
     markAsVacant () {
       console.log('will change occupation from: ' + this.apartment.occupied + ' to false')
       this.apartment.occupied = false
       this.changeStatus(this.apartment._id)
+      this.update()
     },
     isOccupied () {
       return this.apartment.occupied === true
@@ -191,6 +194,12 @@ export default {
     },
     closeSetDueDate () {
       this.settingDueDate = false
+    },
+    update () {
+      console.log('received an update')
+      this.closeDetails()
+      this.openDetails()
+      this.$router.go()
     }
   },
   components: {
@@ -252,6 +261,12 @@ td:first-child {
 .details {
   max-height: 100px;
   overflow-y: auto;
+}
+
+.details pre {
+  overflow-x: hidden;
+  width: inherit;
+  max-width: 500px;
 }
 
 .display-image img {
@@ -325,7 +340,8 @@ p {
   z-index: 99;
   background: white;
   width: 60%;
-  height: 80%;
+  min-height: 80%;
+  padding-bottom: 15px;
   margin-left: 20%;
   border-radius: 10px;
   border: 2px solid green

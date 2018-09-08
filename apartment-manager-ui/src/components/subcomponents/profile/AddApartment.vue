@@ -44,6 +44,7 @@ export default {
         rate: 0,
         occupied: 'false',
         diplayPhotoLink: '',
+        details: '',
         duedate: new Date(),
         displayPhotoFile: ''
       },

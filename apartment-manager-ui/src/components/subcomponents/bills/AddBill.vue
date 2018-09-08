@@ -7,9 +7,10 @@
         <th></th>
         <tr><td class="label">Type:</td><td class="input">
           <select v-model="input.type">
-            <option value="0">Water</option>
-            <option value="1">Electricity</option>
-            <option value="2">Miscellaneous</option>
+            <option value=0>Rent</option>
+            <option value=1>Water</option>
+            <option value=2>Electricity</option>
+            <option value=3>Miscellaneous</option>
           </select>
          </td></tr>
         <tr class="form-group">
@@ -47,11 +48,12 @@
 import { mapState, mapActions } from 'vuex'
 export default {
   name: 'AddBill',
-  props: ['apartmentId'],
+  props: ['apartmentId', 'apartmentName'],
   data () {
     return {
       input: {
         apartmentId: this.apartmentId,
+        apartmentName: this.apartmentName,
         type: 2,
         amount: 0,
         remarks: '',
@@ -74,6 +76,7 @@ export default {
           console.log(this.input)
           this.addBill(this.input)
           this.$emit('addSuccess')
+          this.$emit('updated')
           this.$emit('closeComponent')
         }
       })

@@ -1,7 +1,7 @@
 <template>
   <div class="bills">
     <span>Monthly Bills</span>
-    <div class="bills-list">
+    <div class="bills-list" :key="bills.items">
       <table>
         <tr>
           <th>Type</th>
@@ -11,14 +11,15 @@
         </tr>
         <tr v-for="bill in bills.items" :key="bill._id" class="center">
           <td>
-            <span v-if="bill.type === 0">Water</span>
-            <span v-if="bill.type === 1">Electricity</span>
-            <span v-if="bill.type === 2">Misc</span>
+            <span v-if="parseInt(bill.type) === 0">Rent</span>
+            <span v-if="parseInt(bill.type) === 1">Water</span>
+            <span v-if="parseInt(bill.type) === 2">Electricity</span>
+            <span v-if="parseInt(bill.type) === 3">Misc</span>
           </td>
           <td>{{bill.amount}}</td>
           <td>{{bill.duedate}}</td>
           <td>
-            <span v-if="bill.paid === false"><button class="mark-as-paid" >Mark as Paid</button></span>
+            <span v-if="bill.paid === false"><button class="mark-as-paid" v-on:click="markAsPaid(bill._id)">Mark as Paid</button></span>
             <span v-else>Paid</span>
           </td>
         </tr>
@@ -53,8 +54,13 @@ export default {
   methods: {
     ...mapActions('bills', {
       getByApartmentId: 'getByApartmentId',
-      deleteTenant: 'delete'
-    })
+      deleteBill: 'delete',
+      changeStatus: 'changeStatus'
+    }),
+    markAsPaid (id) {
+      this.changeStatus(id)
+      this.$emit('updated')
+    }
   }
 }
 </script>
