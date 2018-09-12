@@ -17,9 +17,10 @@
         <div>
           <span>Filter by: </span>
           <button v-bind:class="{ activeFilter: filter === 0 }" v-on:click="setFilter(0)">Show All</button>
+          <button v-bind:class="{ activeFilter: filter === 3 }" v-on:click="setFilter(3)">Total</button>
           <button v-bind:class="{ activeFilter: filter === 1 }" v-on:click="setFilter(1)">Paid</button>
           <button v-bind:class="{ activeFilter: filter === 2 }" v-on:click="setFilter(2)">Unpaid</button>
-          <button v-bind:class="{ activeFilter: filter === 3 }" v-on:click="setFilter(3)">Total</button>
+          <button v-bind:class="{ activeFilter: filter === 4 }" v-on:click="setFilter(4)">Notify</button>
         </div>
       </div>
       <div class="due-date-container">
@@ -129,15 +130,15 @@ export default {
       this.changeStatus(id)
     },
     isNearDueDate (date) {
-      // Uncomment code below to implement 2 days before due date notification
-      // var dueDate = new Date(date)
-      // var today = new Date()
-      // var timeDiff = Math.abs(dueDate.getTime() - today.getTime())
-      // var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24))
-      // return (today.getTime() - dueDate.getTime() > 0) || diffDays < 2
-
-      // Always returns true to show all bills for demo purposes, comment to use 2 days before due notification
-      return true
+      if (this.filter === 4) {
+        var dueDate = new Date(date)
+        var today = new Date()
+        var timeDiff = Math.abs(dueDate.getTime() - today.getTime())
+        var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24))
+        return (today.getTime() - dueDate.getTime() > 0) || diffDays < 2
+      } else {
+        return true
+      }
     },
     isOverdue (date) {
       var dueDate = new Date(date)
