@@ -16,6 +16,7 @@ service.getById = getById;
 service.getByApartmentId = getByApartmentId;
 service.create = create;
 service.update = update;
+service.payAll = payAll;
 service.changeStatus = changeStatus;
 service.delete = _delete;
 
@@ -84,6 +85,36 @@ function create(unitParam) {
   return deferred.promise;
 }
 
+function payAll(_id) {
+    var deferred = Q.defer();
+        // fields to update
+
+        db.bills.find({ "apartmentId": _id }).toArray(function (err, bills) {
+            if (err) deferred.reject(err.name + ': ' + err.message);
+            _.map(bills, function (bill) {
+                updateSpecBill(bill._id);
+            });
+        });
+
+        function updateSpecBill(id) {
+        var set = {
+            paid: true,
+            datePaid: new Date()
+        };
+
+        db.bills.update(
+            { _id: mongo.helper.toObjectID(id) },
+            { $set: set },
+            function (err, doc) {
+                if (err) deferred.reject(err.name + ': ' + err.message);
+  
+                console.log("resolving change statuses")
+                deferred.resolve();
+            });
+        }
+    return deferred.promise;
+}
+
 function changeStatus(_id) {
     var deferred = Q.defer();
     var currentStatus;
@@ -103,7 +134,8 @@ function changeStatus(_id) {
     function updateBill() {
         // fields to update
         var set = {
-            paid: newStatus
+            paid: newStatus,
+            datePaid: new Date().toDateString()
         };
   
         console.log("will update: " + mongo.helper.toObjectID(_id))

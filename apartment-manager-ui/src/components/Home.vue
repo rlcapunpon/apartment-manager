@@ -7,6 +7,8 @@
     <div id="delete" v-if="!deleting" class="left" v-on:click="showDeleteOptions">-</div>
     <span id="logout" class="link" v-on:click="logout">Logout</span>
     <span id="separator">|</span>
+    <span id="register"><router-link to="/register" class="btn btn-link">New User</router-link></span>
+    <span id="separator">|</span>
     <span id="add" class="link" v-on:click="showAddModal">New Apartment</span>
   </header>
 
@@ -83,11 +85,22 @@ export default {
   margin-top: 2px;
 }
 
-#add {
+#add, #register {
   size: 10px;
   color: green;
   font-size: 15px;
   margin-top: 2px;
+  text-decoration: none;
+  color: green;
+}
+
+#add:hover, #register:hover {
+  text-decoration: underline;
+}
+
+#register a {
+  text-decoration: none;
+  color: green;
 }
 
 header {

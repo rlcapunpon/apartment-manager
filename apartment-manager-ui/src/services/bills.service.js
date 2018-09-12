@@ -7,6 +7,7 @@ export const billService = {
   getAll,
   changeStatus,
   getByApartment,
+  markAllAsPaid,
   // update,
   delete: _delete
 }
@@ -48,6 +49,15 @@ function changeStatus (id) {
   }
 
   return fetch(`${apiUrl}/bills/status/${id}`, requestOptions).then(handleResponse)
+}
+
+function markAllAsPaid (id) {
+  const requestOptions = {
+    method: 'PUT',
+    headers: authHeader()
+  }
+
+  return fetch(`${apiUrl}/bills/payall/${id}`, requestOptions).then(handleResponse)
 }
 
 function _delete (id) {

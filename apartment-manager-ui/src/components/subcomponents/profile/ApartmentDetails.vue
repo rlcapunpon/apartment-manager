@@ -60,7 +60,7 @@
 
     </div>
     <add-tenant class="add-tenant" :apartmentId="apartment._id" v-if="addingTenant" v-on:hasTenant="occupy" v-on:closeComponent="closeAddTenant"></add-tenant>
-    <add-bill class="add-bill" :apartmentId="apartment._id" :apartmentName="apartment.name" v-if="addingBill" v-on:updated="update" v-on:addSuccess="billed" v-on:closeComponent="closeAddBill"></add-bill>
+    <add-bill class="add-bill" :apartmentId="apartment._id" :apartmentName="apartment.name" :rent="apartment.rate" v-if="addingBill" v-on:updated="update" v-on:addSuccess="billed" v-on:closeComponent="closeAddBill"></add-bill>
 
     <div v-if="!deleted" class="apartment-unit" v-bind:class="{ forDelete: deleting }">
       <div class="display-image" v-on:click="openDetails()">
@@ -157,6 +157,7 @@ export default {
     occupy () {
       this.hasTenant = true
       this.markAsOccupied()
+      console.log('occupy was called by an event')
     },
     billed () {
       this.hasBill = true

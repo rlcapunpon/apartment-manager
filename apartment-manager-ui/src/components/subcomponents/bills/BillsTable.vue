@@ -1,7 +1,7 @@
 <template>
   <div class="bills">
     <span>Monthly Bills</span>
-    <div class="bills-list" :key="bills.items">
+    <div class="bills-list">
       <table>
         <tr>
           <th>Type</th>

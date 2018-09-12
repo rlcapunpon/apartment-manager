@@ -8,6 +8,7 @@ router.post('/add', add);
 router.get('/', getAll);
 router.get('/apartment/:_id', getByApartmentId)
 router.put('/status/:_id', changeStatus);
+router.put('/payall/:_id', payAll);
 router.put('/:_id', update);
 router.delete('/:_id', _delete);
 
@@ -27,7 +28,7 @@ function add(req, res) {
 }
 
 function getAll(req, res) {
-  billsService.getAllUnpaid()
+  billsService.getAll()
       .then(function (bills) {
           res.send(bills);
       })
@@ -73,6 +74,17 @@ function update(req, res) {
 function changeStatus(req, res) {
     console.log("changing status of: " + req.params._id);
     billsService.changeStatus(req.params._id)
+        .then(function () {
+            res.sendStatus(200);
+        })
+        .catch(function (err) {
+            res.status(400).send(err);
+        });
+  }
+
+  function payAll(req, res) {
+    console.log("paying all: " + req.params._id);
+    billsService.payAll(req.params._id)
         .then(function () {
             res.sendStatus(200);
         })

@@ -6,7 +6,7 @@
       <table>
         <th></th>
         <tr><td class="label">Type:</td><td class="input">
-          <select v-model="input.type">
+          <select v-model="input.type" @change="checkForAutoRent()">
             <option value=0>Rent</option>
             <option value=1>Water</option>
             <option value=2>Electricity</option>
@@ -48,7 +48,7 @@
 import { mapState, mapActions } from 'vuex'
 export default {
   name: 'AddBill',
-  props: ['apartmentId', 'apartmentName'],
+  props: ['apartmentId', 'apartmentName', 'rent'],
   data () {
     return {
       input: {
@@ -83,6 +83,13 @@ export default {
     },
     closePanel () {
       this.$emit('closeComponent')
+    },
+    checkForAutoRent () {
+      if (parseInt(this.input.type) === 0) {
+        console.log(this.rent)
+        console.log(parseInt(this.rent))
+        this.input.amount = parseInt(this.rent)
+      }
     }
   }
 }

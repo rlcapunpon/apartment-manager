@@ -15,9 +15,6 @@
       </div>
     </form>
     <br/>
-    <div>
-      Don't have an account yet? <router-link to="/register" class="btn btn-link">Register Now</router-link>
-    </div>
   </div>
 </template>
 

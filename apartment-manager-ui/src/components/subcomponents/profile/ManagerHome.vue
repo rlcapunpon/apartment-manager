@@ -12,32 +12,53 @@
       <!-- <button id="create-new" v-if="!adding" v-on:click="initCreateNew">+ Add New</button> -->
     </div>
     <div class="notifications" v-if="!isSelecting && !adding">
-      <h3>Upcoming Due Dates:</h3>
+      <div>
+        <h3>Upcoming Due Dates:</h3> 
+        <div>
+          <span>Filter by: </span>
+          <button v-bind:class="{ activeFilter: filter === 0 }" v-on:click="setFilter(0)">Show All</button>
+          <button v-bind:class="{ activeFilter: filter === 1 }" v-on:click="setFilter(1)">Paid</button>
+          <button v-bind:class="{ activeFilter: filter === 2 }" v-on:click="setFilter(2)">Unpaid</button>
+          <button v-bind:class="{ activeFilter: filter === 3 }" v-on:click="setFilter(3)">Total</button>
+        </div>
+      </div>
       <div class="due-date-container">
         <table>
         <tr>
-          <th>Apartment</th>
-          <th>Type</th>
+          <th>Apartment&nbsp;<input type="text" v-model="apartmentNameFilter" placeholder="Filter"></th>
+          <th>Type&nbsp;
+            <select v-if="filter !== 3" v-model="typeFilter">
+            <option value=4>All</option>
+            <option value=0>Rent</option>
+            <option value=1>Water</option>
+            <option value=2>Electricity</option>
+            <option value=3>Miscellaneous</option>
+          </select>
+          </th>
           <th>Amount</th>
-          <th>Remarks</th>
-          <th>Due Date</th>
+          <th v-if="filter !== 3">Remarks</th>
+          <th v-if="filter !== 3">Due Date</th>
+          <th v-if="filter === 1">Date Paid</th>
           <th>Status</th>
         </tr>
-        <tr v-for="bill in bills.items" v-if="isNearDueDate(bill.duedate)" :key="bill._id" class="center">
+        <tr v-for="bill in bills.items" v-bind:class="{ overdue: isOverdue(bill.duedate) }" v-if="(isNearDueDate(bill.duedate) && isFiltered(bill.apartmentName, bill.type, bill.paid)) || filter === 3" :key="bill._id" class="center">
           <td>
             {{bill.apartmentName}}
           </td>
           <td>
             <span v-if="parseInt(bill.type) === 0">Rent</span>
-            <span v-if="parseInt(bill.type) === 1">Water</span>
-            <span v-if="parseInt(bill.type) === 2">Electricity</span>
-            <span v-if="parseInt(bill.type) === 3">Misc</span>
+            <span v-else-if="parseInt(bill.type) === 1">Water</span>
+            <span v-else-if="parseInt(bill.type) === 2">Electricity</span>
+            <span v-else-if="parseInt(bill.type) === 3">Misc</span>
+            <span v-else>Total</span>
           </td>
           <td>{{bill.amount}}</td>
-          <td>{{bill.remarks}}</td>
-          <td>{{bill.duedate}}</td>
+          <td v-if="filter !== 3">{{bill.remarks}}</td>
+          <td v-if="filter !== 3">{{bill.duedate}}</td>
+          <td v-if="filter === 1">{{bill.datePaid}}</td>
           <td>
-            <span v-if="bill.paid === false"><button class="mark-as-paid" v-on:click="markAsPaid(bill._id)">Mark as Paid</button></span>
+            <span v-if="bill.paid === false && filter !== 3 "><button class="mark-as-paid" v-on:click="markAsPaid(bill._id)">Mark as Paid</button></span>
+            <span v-else-if="filter === 3"><button class="mark-as-paid" v-on:click="markTotalAsPaid(bill.apartmentId)">Mark Total as Paid</button></span>
             <span v-else>Paid</span>
           </td>
         </tr>
@@ -57,7 +78,11 @@ export default {
   data () {
     return {
       adding: false,
-      isSelecting: false
+      isSelecting: false,
+      filter: 0,
+      apartmentNameFilter: '',
+      typeFilter: 4,
+      totaled: []
     }
   },
   computed: {
@@ -80,7 +105,8 @@ export default {
     }),
     ...mapActions('bills', {
       getAllBills: 'getAll',
-      changeStatus: 'changeStatus'
+      changeStatus: 'changeStatus',
+      markAllAsPaid: 'markAllAsPaid'
     }),
     initCreateNew () {
       this.adding = true
@@ -94,6 +120,8 @@ export default {
     },
     closed () {
       this.isSelecting = false
+      this.$router.go()
+      this.setFilter(this.filter)
     },
     markAsPaid (id) {
       console.log(id)
@@ -110,6 +138,99 @@ export default {
 
       // Always returns true to show all bills for demo purposes, comment to use 2 days before due notification
       return true
+    },
+    isOverdue (date) {
+      var dueDate = new Date(date)
+      var today = new Date()
+      return (today.getTime() - dueDate.getTime()) > 0
+    },
+    setFilter (value) {
+      this.filter = value
+      if (parseInt(value) === 3) {
+        console.log('trying to summarize')
+        this.summarize()
+      } else {
+        this.getAllBills()
+      }
+      console.log(this.filter)
+    },
+    isFiltered (name, type, paid) {
+      if (this.isAdvancedFilteredName(name) && this.isAdvancedFilteredType(type)) {
+        console.log('filter passed')
+        if (this.filter === 0) {
+          return true
+        } else if (this.filter === 1 && paid) {
+          return true
+        } else if (this.filter === 2 && !paid) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
+    },
+    isAdvancedFilteredName (name) {
+      if (name === undefined) {
+        return true
+      }
+      if (this.apartmentNameFilter === '') {
+        return true
+      }
+      if (name.includes(this.apartmentNameFilter)) {
+        return true
+      } else {
+        console.log('returning false for name')
+        return false
+      }
+    },
+    isAdvancedFilteredType (type) {
+      if (parseInt(this.typeFilter) === 4) {
+        return true
+      }
+      if (parseInt(type) === parseInt(this.typeFilter)) {
+        return true
+      } else {
+        console.log('returning false for type')
+        return false
+      }
+    },
+    summarize () {
+      var summary = this.bills.items
+      this.totaled = []
+      for (var i = 0; i < summary.length; i++) {
+        if (!summary[i].paid) {
+          this.addToTotaled(summary[i])
+        }
+      }
+      this.bills.items = this.totaled
+    },
+    addToTotaled (bill) {
+      var found = false
+      for (var i = 0; i < this.totaled.length; i++) {
+        if (bill.apartmentId === this.totaled[i].apartmentId) {
+          found = true
+          this.totaled[i].amount += parseInt(bill.amount)
+          console.log('found adding..' + ' total: ' + this.totaled[i].amount)
+          break
+        }
+      }
+      if (found === false) {
+        console.log('not found.. creating')
+        var item = {}
+        item.apartmentName = bill.apartmentName
+        item.type = 4
+        item.amount = parseInt(bill.amount)
+        console.log('total at creating: ' + item.amount)
+        item.apartmentId = bill.apartmentId
+        item.paid = false
+        this.totaled.push(item)
+      }
+    },
+    markTotalAsPaid (apartmentId) {
+      console.log(apartmentId)
+      this.$router.go()
+      this.markAllAsPaid(apartmentId)
     }
   },
   components: {
@@ -165,10 +286,18 @@ export default {
   color: green;
 }
 
+.activeFilter {
+  background: #565555;;
+}
+
+.activeFilter:hover {
+  background: #565555;;
+}
+
 .due-date-container {
   background: white;
   min-height: 81%;
-  margin-top: 42px;
+  margin-top: 10px;
   border-top: 1px solid green;
 }
 
@@ -191,5 +320,14 @@ export default {
   height: 18px;
   width: 100%;
   border-radius: 2px;
+}
+
+.overdue {
+  background: red;
+  color: white;
+}
+
+th input {
+  text-align: center;
 }
 </style>

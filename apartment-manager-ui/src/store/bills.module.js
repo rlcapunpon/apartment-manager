@@ -51,6 +51,15 @@ const actions = {
         error => commit('changeStatusFailure', { id, error: error.toString() })
       )
   },
+  markAllAsPaid ({ commit }, id) {
+    commit('changeStatusRequest')
+    router.push('/')
+    billService.markAllAsPaid(id)
+      .then(
+        bill => commit('changeStatusSuccess', { id, bill }),
+        error => commit('changeStatusFailure', { id, error: error.toString() })
+      )
+  },
   delete ({ commit }, id) {
     commit('deleteRequest', id)
     router.push('/')
