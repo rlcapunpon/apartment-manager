@@ -135,7 +135,7 @@ export default {
         var today = new Date()
         var timeDiff = Math.abs(dueDate.getTime() - today.getTime())
         var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24))
-        return (today.getTime() - dueDate.getTime() > 0) || diffDays < 2
+        return (today.getTime() - dueDate.getTime() > 0) || diffDays <== 2
       } else {
         return true
       }
