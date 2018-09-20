@@ -42,7 +42,7 @@
           <th v-if="filter === 1">Date Paid</th>
           <th>Status</th>
         </tr>
-        <tr v-for="bill in bills.items" v-bind:class="{ overdue: isOverdue(bill.duedate) }" v-if="(isNearDueDate(bill.duedate) && isFiltered(bill.apartmentName, bill.type, bill.paid)) || filter === 3" :key="bill._id" class="center">
+        <tr v-for="bill in bills.items" v-bind:class="{ overdue: isOverdue(bill.duedate) }" v-if="((isNearDueDate(bill.duedate) && filter === 4) || isFiltered(bill.apartmentName, bill.type, bill.paid)) || filter === 3" :key="bill._id" class="center">
           <td>
             {{bill.apartmentName}}
           </td>
@@ -135,7 +135,8 @@ export default {
         var today = new Date()
         var timeDiff = Math.abs(dueDate.getTime() - today.getTime())
         var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24))
-        return (today.getTime() - dueDate.getTime() > 0) || diffDays <== 2
+        console.log('diffdays: ' + diffDays + ' - ' + ((today.getTime() - dueDate.getTime() > 0) || diffDays <= 2))
+        return (today.getTime() - dueDate.getTime() > 0) || diffDays <= 2
       } else {
         return true
       }
