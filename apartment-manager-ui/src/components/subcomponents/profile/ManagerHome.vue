@@ -42,7 +42,7 @@
           <th v-if="filter === 1">Date Paid</th>
           <th>Status</th>
         </tr>
-        <tr v-for="bill in bills.items" v-bind:class="{ overdue: isOverdue(bill.duedate) }" v-if="((isNearDueDate(bill.duedate) && filter === 4) || isFiltered(bill.apartmentName, bill.type, bill.paid)) || filter === 3" :key="bill._id" class="center">
+        <tr v-for="bill in bills.items" v-bind:class="{ overdue: isOverdue(bill.duedate, bill.paid) }" v-if="((isNearDueDate(bill.duedate) && filter === 4) || isFiltered(bill.apartmentName, bill.type, bill.paid)) || filter === 3" :key="bill._id" class="center">
           <td>
             {{bill.apartmentName}}
           </td>
@@ -141,7 +141,10 @@ export default {
         return true
       }
     },
-    isOverdue (date) {
+    isOverdue (date, paid) {
+      if (paid) {
+        return false
+      }
       var dueDate = new Date(date)
       var today = new Date()
       return (today.getTime() - dueDate.getTime()) > 0
